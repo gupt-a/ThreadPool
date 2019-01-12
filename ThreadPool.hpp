@@ -24,26 +24,22 @@ freely, subject to the following restrictions:
 #ifndef THREAD_POOL_HPP
 #define THREAD_POOL_HPP
 
-// containers
-#include <vector>
-#include <queue>
-// threading
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <atomic>
-#include <future>
-// utility wrappers
-#include <memory>
+#include <condition_variable>
 #include <functional>
-// exceptions
+#include <memory>
+#include <mutex>
+#include <future>
+#include <queue>
 #include <stdexcept>
+#include <thread>
+#include <vector>
 
 // std::thread pool for resources recycling
-class ThreadPool {
+class thread_pool {
 public:
     // the constructor just launches some amount of workers
-    ThreadPool(size_t threads_n = std::thread::hardware_concurrency()) : stop(false)
+    thread_pool(size_t threads_n = std::thread::hardware_concurrency()) : stop(false)
     {
         if(!threads_n)
             throw std::invalid_argument("more than zero threads expected");
@@ -73,10 +69,10 @@ public:
             );
     }
     // deleted copy&move ctors&assignments
-    ThreadPool(const ThreadPool&) = delete;
-    ThreadPool& operator=(const ThreadPool&) = delete;
-    ThreadPool(ThreadPool&&) = delete;
-    ThreadPool& operator=(ThreadPool&&) = delete;
+    thread_pool(const thread_pool&) = delete;
+    thread_pool& operator=(const thread_pool&) = delete;
+    thread_pool(thread_pool&&) = delete;
+    thread_pool& operator=(thread_pool&&) = delete;
     // add new work item to the pool
     template<class F, class... Args>
     std::future<typename std::result_of<F(Args...)>::type> enqueue(F&& f, Args&&... args)
@@ -95,7 +91,7 @@ public:
         return res;
     }
     // the destructor joins all threads
-    virtual ~ThreadPool()
+    virtual ~thread_pool()
     {
         this->stop = true;
         this->condition.notify_all();
